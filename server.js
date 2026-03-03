@@ -1,12 +1,20 @@
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 
 function pingServer(userIP) {
-  // DANGER: Taking untrusted user input and putting it directly into a system command!
-  // An attacker could pass an IP like: "8.8.8.8; rm -rf /"
+  // Basic validation (extra protection)
+  const ipRegex = /^(?:\d{1,3}\.){3}\d{1,3}$/;
 
-  const command = "ping -c 4 " + userIP;
+  if (!ipRegex.test(userIP)) {
+    console.error("Invalid IP address");
+    return;
+  }
 
-  exec(command, (error, stdout, stderr) => {
+  execFile('ping', ['-c', '4', userIP], (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error: ${error.message}`);
+      return;
+    }
+
     console.log(stdout);
   });
 }
